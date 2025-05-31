@@ -1,0 +1,7 @@
+# Ignore Cargo build artifacts
+/target
+# Ignore lock files inside any subcrate if you want to manage only at workspace level
+**/Cargo.lock
+
+# Ignore local env file
+.env

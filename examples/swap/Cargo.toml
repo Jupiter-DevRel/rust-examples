@@ -1,0 +1,10 @@
+[package]
+name = "swap"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+common = { path = "../../common" }
+tokio  = { version = "1.14", features = ["macros", "rt-multi-thread"] }
+anyhow = "1.0"
+bs58  = "0.4"

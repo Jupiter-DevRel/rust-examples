@@ -1,0 +1,9 @@
+[workspace]
+members = [
+  "common",
+  "examples/ultra",
+  "examples/swap_instruction",
+  "examples/swap",
+  "examples/trigger",
+  "examples/recurring",
+]
