@@ -77,6 +77,8 @@ pub fn keypair(cfg: &Config) -> Keypair {
     }
 }
 
+
+
 // Helper to sign a versioned transaction
 fn sign_versioned_tx(tx: &mut VersionedTransaction, kp: &Keypair) {
     let message = tx.message.clone();
@@ -148,6 +150,7 @@ pub async fn swap_flow() -> Result<()> {
      let mut swap_body = json!({
      "quoteResponse": quote,
      "userPublicKey": user_pubkey,
+     "payer": user_pubkey, // Use same account for both user and payer
     });
     if let Some((acc, _)) = integrator_fee() {
         swap_body["feeAccount"] = acc.into();
@@ -291,9 +294,11 @@ pub async fn swap_instruction_flow() -> Result<()> {
         .await?;
 
     // ─────────── /swap-instructions ─────────────────────────────────
+    let user_pubkey = kp.pubkey().to_string();
     let mut body = json!({
         "quoteResponse": quote,
-        "userPublicKey": kp.pubkey().to_string(),
+        "userPublicKey": user_pubkey,
+        "payer": user_pubkey, // Use same account for both user and payer
         "instructionFormat": "json",
     });
     if let Some((acc, _)) = integrator_fee() {
@@ -340,11 +345,11 @@ pub async fn swap_instruction_flow() -> Result<()> {
     }
 
     // compile message & send -------------------------------------------------
-    let payer            = kp.pubkey();
+    let payer            = kp.pubkey();  // Use main account as transaction payer
     let recent_blockhash = rpc.get_latest_blockhash()?;
     let msg              = Message::try_compile(&payer, &ix, &alts, recent_blockhash)?;
     let versioned        = VersionedMessage::V0(msg);
-    let tx               = VersionedTransaction::try_new(versioned, &[&kp])?;
+    let tx               = VersionedTransaction::try_new(versioned, &[&kp])?;  // Sign with main keypair only
 
     let sig = rpc.send_and_confirm_transaction(&tx)?;
     println!("swap-instructions tx confirmed: {sig}");
